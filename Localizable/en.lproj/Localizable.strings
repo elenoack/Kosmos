@@ -1,0 +1,11 @@
+
+"new_game" = "New Game";
+"settings" = "Settings";
+"menu" = "menu";
+"nameless" = "Nameless";
+"save_results?" = "Save results?";
+"back" = "Back";
+"player_with_the_result" = "🏆 Player %@ with the result - %ld";
+"game_over!" = "Game over!";
+"your_result: " = "Your result: ";
+"list_of_leaders" = "List of Leaders";
