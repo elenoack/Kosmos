@@ -8,7 +8,6 @@
 import UIKit
 
 extension UIButton {
-    
     convenience init(title: String?,
                      font: UIFont? = nil,
                      color: UIColor? = nil) {
