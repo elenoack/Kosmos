@@ -9,12 +9,18 @@ import UIKit
 
 class LeadersViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     // MARK: - Properties
+    let blurView: UIVisualEffectView = {
+        let view = UIVisualEffectView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     @IBOutlet weak var tableView: UITableView!
     private let defaults = UserDefaultsStorage()
     
     // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupBlurView()
         tableView.dataSource = self
         tableView.delegate = self
         tableView.backgroundColor = .clear
@@ -22,9 +28,12 @@ class LeadersViewController: UIViewController, UITableViewDelegate, UITableViewD
         tableView.reloadData()
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+    }
+    
     @IBAction func openMenu(_ sender: UIButton) {
-        let nextViewController = storyboard!.instantiateViewController(withIdentifier: "HomeStoryboard")
-        present(nextViewController, animated: false, completion: nil)
+        self.view.window!.rootViewController?.dismiss(animated: false, completion: nil)
     }
 }
 
@@ -32,7 +41,7 @@ class LeadersViewController: UIViewController, UITableViewDelegate, UITableViewD
 extension LeadersViewController {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        defaults.list.count
+        return defaults.list.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -46,6 +55,21 @@ extension LeadersViewController {
     }
 }
 
+// MARK: - private
+private extension LeadersViewController {
+    
+    func setupBlurView() {
+        view.addSubview(blurView)
+        blurView.effect = UIBlurEffect(style: .extraLight)
+        blurView.alpha = 0.25
+        NSLayoutConstraint.activate([
+            blurView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            blurView.topAnchor.constraint(equalTo: view.topAnchor),
+            blurView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor)
+        ])
+    }
+}
 
    
 
