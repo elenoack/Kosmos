@@ -10,6 +10,12 @@ import Foundation
 
 class GameViewController: UIViewController {
     // MARK: - Properties
+    let blurView: UIVisualEffectView = {
+        let view = UIVisualEffectView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    var isPaused = true
     var namePlayer = UILabel()
     private let defaults = UserDefaultsStorage()
     @IBOutlet weak var pointsLabel: UILabel!
@@ -37,6 +43,7 @@ class GameViewController: UIViewController {
     var randomElementOne: UIView!
     private var timer: Timer? = nil
     private var intersectsTimer: Timer? = nil
+    private var pointsTimer: Timer? = nil
     
     enum Constants {
         static var shipWidht: CGFloat = 115
@@ -52,6 +59,7 @@ class GameViewController: UIViewController {
         super.viewDidLoad()
         defaults.points = 0
         setupLevel()
+        setupBlurView()
         setupViews()
     }
     
@@ -61,10 +69,26 @@ class GameViewController: UIViewController {
         setupAnimation()
         setupNamePlayer()
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+    }
 }
 
 // MARK: - private
 private extension GameViewController {
+    
+    func setupBlurView() {
+        view.addSubview(blurView)
+        blurView.backgroundColor = .white
+        blurView.alpha = 0.65
+        NSLayoutConstraint.activate([
+            blurView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            blurView.topAnchor.constraint(equalTo: view.topAnchor),
+            blurView.heightAnchor.constraint(equalToConstant: 38)
+        ])
+    }
     
     func setupViews() {
         
@@ -141,9 +165,11 @@ private extension GameViewController {
 extension GameViewController {
     
     func setupAnimation() {
+       if isPaused {
         timer = Timer.scheduledTimer(timeInterval: 11, target: self, selector: #selector(createMeteorites), userInfo: nil, repeats: true)
         
-        intersectsTimer = Timer.scheduledTimer(timeInterval: 0.5, target: self, selector: #selector(findIntersects), userInfo: nil, repeats: true)
+        intersectsTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(findIntersects), userInfo: nil, repeats: true)
+       }
         
         UIView.animate(withDuration: 11, delay: 0.0, options: [.repeat, .curveLinear], animations: {
             
@@ -172,16 +198,24 @@ extension GameViewController {
             let newPlayer = String(format: NSLocalizedString("player_with_the_result", comment: ""), defaults.namePlayer ?? "", defaults.points)
             
             defaults.list.append(newPlayer)
-            defaults.list.sort(by: { $0 > $1 })
+            sortingPlayers(with: &defaults.list)
             
             if defaults.list.count > 10 {
                 defaults.list.removeLast()
             }
-            dismiss(animated: false, completion: nil)
+            
+            let nextViewController = storyboard!.instantiateViewController(withIdentifier: "LeadersStoryboard")
+            present(nextViewController, animated: false, completion: nil)
+           isPaused = false
+            timer?.invalidate()
+            intersectsTimer?.invalidate()
         }
         
         func back(action: UIAlertAction)  {
             dismiss(animated: false, completion: nil)
+            isPaused = false
+            timer?.invalidate()
+            intersectsTimer?.invalidate()
         }
     }
     
@@ -196,38 +230,38 @@ extension GameViewController {
         self.randomElementOne.frame.origin.x = CGFloat.random(in: 0..<self.view.bounds.maxX - self.randomElement.frame.width - self.randomElementOne.frame.width)
         self.randomElementOne.frame.origin.y = self.view.frame.minY - self.randomElementOne.frame.height
         
+        UIView.animate(withDuration: 8,
+                             delay: 0, options: [.curveLinear]) {
+            self.randomElement.frame = self.randomElement.frame.offsetBy(dx: 0.0, dy: +1 * (self.view.bounds.height + self.randomElement.frame.size.height))
+            } completion: { _ in
+                if self.randomElement.frame.maxY == self.view.frame.maxY + self.randomElement.frame.size.height {
+                    print("Первый элемент")
+                    self.defaults.points += 1
+                }
+            }
+    
         UIView.animate(withDuration: 11,
-                       delay: 0, animations: { self.randomElement.frame.origin.y = self.view.frame.maxY }
-        ) { finished in
-            self.defaults.points += 1
-            self.pointsLabel.text = "\(self.defaults.points)"
-        }
-        
-        UIView.animate(withDuration: 11,
-                       delay: 4, animations:  {
-            self.randomElementOne.frame.origin.y =
-            self.view.frame.maxY }
-        ) { finished in
-            self.defaults.points += 1
-            self.pointsLabel.text = "\(self.defaults.points)"
+                       delay: 4, options: [.curveLinear]) {
+            self.randomElementOne.frame = self.randomElementOne.frame.offsetBy(dx: 0.0, dy: +1 * (self.view.bounds.height + self.randomElementOne.frame.size.height))
+        } completion: { _ in
+            if self.randomElementOne.frame.maxY == self.view.frame.maxY + self.randomElementOne.frame.size.height {
+                print("Второй элемент")
+                self.defaults.points += 1
+            }
         }
     }
     
     @objc func findIntersects() {
-        if randomElement != nil {
-            if self.shipView.frame.intersects(self.randomElement.layer.presentation()!.frame) {
+        self.pointsLabel.text = "\(self.defaults.points)"
+        if randomElement != nil || randomElementOne != nil {
+            if self.shipView.frame.intersects(self.randomElement.layer.presentation()!.frame) || self.shipView.frame.intersects(self.randomElementOne.layer.presentation()!.frame) {
                 let alert = UIAlertController(title: NSLocalizedString("game_over", comment: ""), message: NSLocalizedString("your_result", comment: "") + "\(self.defaults.points)", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: NSLocalizedString("list_of_leaders", comment: ""), style: .default, handler: self.openLeaders))
-                present(alert, animated: true, completion: nil) }
-        }
-        if randomElementOne != nil {
-            if self.shipView.frame.intersects(self.randomElementOne.layer.presentation()!.frame) {
-                let alert = UIAlertController(title: NSLocalizedString("game_over!", comment: ""), message: NSLocalizedString("your_result: ", comment: "") + "\(self.defaults.points)", preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: NSLocalizedString("list_of_leaders", comment: ""), style: .default, handler: self.openLeaders))
-                present(alert, animated: true, completion: nil) }
+                present(alert, animated: true, completion: nil)
+            }
         }
     }
-    
+
     @objc func moveShip(_ recognizer: UIPanGestureRecognizer) {
         switch recognizer.state {
         case .began:
@@ -260,7 +294,8 @@ extension GameViewController {
         let newPlayer = String(format: NSLocalizedString("player_with_the_result", comment: ""), defaults.namePlayer ?? "", defaults.points)
         
         defaults.list.append(newPlayer)
-        defaults.list.sort(by: { $0 > $1 })
+        sortingPlayers(with: &defaults.list)
+        print(defaults.list)
         
         if defaults.list.count > 10 {
             defaults.list.removeLast()
@@ -268,6 +303,9 @@ extension GameViewController {
         
         let nextViewController = storyboard!.instantiateViewController(withIdentifier: "LeadersStoryboard")
         present(nextViewController, animated: false, completion: nil)
+        isPaused = false
+        timer?.invalidate()
+        intersectsTimer?.invalidate()
     }
 }
 
@@ -280,8 +318,18 @@ private extension GameViewController {
         }
     }
     
+    func sortingPlayers(with array: inout [String]) {
+      var dictionaries = [String: Int]()
+      for players in array {
+        if let number = Int(players.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()) {
+          dictionaries[players] = number
+        }
+      }
+        array.removeAll()
+      array = Array(dictionaries.keys).sorted(by: { (dictionaries[$0] ?? 0) > (dictionaries[$1] ?? 0) })
+    }
+    
     func setupLevel() {
-        
         switch defaults.level {
         case 0:
             Constants.shipWidht = 100
