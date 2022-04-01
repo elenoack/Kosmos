@@ -9,6 +9,11 @@ import UIKit
 
 class HomeViewController: UIViewController {
     // MARK: - Properties
+    let blurView: UIVisualEffectView = {
+        let view = UIVisualEffectView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     let storyboardInstance = UIStoryboard(name: "Main", bundle: nil)
     var background = UIImageView(image: UIImage(named: "HomeBackground"))
     let newGameButton = UIButton(title: NSLocalizedString("new_game", comment: ""),font: UIFont(name: "UsuallyfontBold", size: 24), color: .red)
@@ -17,6 +22,7 @@ class HomeViewController: UIViewController {
     // MARK: - View Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
+        setupBlurView()
         setupViews()
     }
     
@@ -34,6 +40,18 @@ class HomeViewController: UIViewController {
 // MARK: - private
 private extension HomeViewController {
     
+    func setupBlurView() {
+        view.addSubview(blurView)
+        blurView.effect = UIBlurEffect(style: .extraLight)
+        blurView.alpha = 0.25
+        NSLayoutConstraint.activate([
+            blurView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            blurView.topAnchor.constraint(equalTo: view.topAnchor),
+            blurView.bottomAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor)
+        ])
+    }
+
     func setupViews() {
         view.backgroundColor = .systemFill
         background.contentMode = .scaleAspectFill
