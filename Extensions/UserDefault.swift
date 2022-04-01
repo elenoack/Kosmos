@@ -63,3 +63,4 @@ struct ListUserDefault<T: PropertyListValue> {
         set { UserDefaults.standard.set(newValue, forKey: key.rawValue) }
     }
 }
+
