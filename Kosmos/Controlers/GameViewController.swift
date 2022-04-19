@@ -168,9 +168,9 @@ extension GameViewController {
     
     func setupAnimation() {
        if isPaused {
-        timer = Timer.scheduledTimer(timeInterval: 11, target: self, selector: #selector(createMeteorites), userInfo: nil, repeats: true)
-        
-        intersectsTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(findIntersects), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(createMeteorites), userInfo: nil, repeats: true)
+           
+           intersectsTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(findIntersects), userInfo: nil, repeats: true)
        }
         
         UIView.animate(withDuration: 11, delay: 0.0, options: [.repeat, .curveLinear], animations: {
@@ -224,17 +224,17 @@ extension GameViewController {
     @objc func createMeteorites() {
         
         randomElement = meteorites.randomElement()
-        self.randomElement?.frame.origin.x = CGFloat.random(in: 0..<self.view.bounds.maxX - (self.randomElement?.frame.width ?? 0))
+        self.randomElement?.frame.origin.x = CGFloat.random(in: 0..<self.view.bounds.maxX - (self.randomElement?.frame.width ?? 0) - (self.randomElementOne?.frame.width ?? 0))
         
         self.randomElement?.frame.origin.y = self.view.frame.minY - (self.randomElement?.frame.height ?? 0)
         
         randomElementOne = meteorites.randomElement()
-        self.randomElementOne?.frame.origin.x = CGFloat.random(in: 0..<self.view.bounds.maxX - (self.randomElement?.frame.width ?? 0) - (self.randomElementOne?.frame.width ?? 0))
-                                                               
-        self.randomElementOne?.frame.origin.y = self.view.frame.minY - (self.randomElementOne?.frame.height ?? 0)
+             self.randomElementOne?.frame.origin.x = CGFloat.random(in: 0..<self.view.bounds.maxX - (self.randomElement?.frame.width ?? 0) - (self.randomElementOne?.frame.width ?? 0))
+                                                                    
+             self.randomElementOne?.frame.origin.y = self.view.frame.minY - (self.randomElementOne?.frame.height ?? 0)
         
         if let randomElement = randomElement {
-            UIView.animate(withDuration: 6,
+            UIView.animate(withDuration: 7,
                            delay: 0, options: [.curveLinear]) {
                 randomElement.frame = randomElement.frame.offsetBy(dx: 0.0, dy: +1 * (self.view.bounds.height + randomElement.frame.size.height))
             } completion: { _ in
@@ -244,24 +244,24 @@ extension GameViewController {
                 }
             }
         }
-    
+        
         if let randomElementOne = randomElementOne {
-        UIView.animate(withDuration: 6,
-                             delay: 4, options: [.curveLinear]) {
-            randomElementOne.frame = randomElementOne.frame.offsetBy(dx: 0.0, dy: +1 * (self.view.bounds.height + randomElementOne.frame.size.height))
-            } completion: { _ in
-                if randomElementOne.frame.maxY == self.view.frame.maxY + randomElementOne.frame.size.height {
-                    print("Второй элемент")
-                    self.defaults.points += 1
+                UIView.animate(withDuration: 7,
+                                     delay: 4, options: [.curveLinear]) {
+                    randomElementOne.frame = randomElementOne.frame.offsetBy(dx: 0.0, dy: +1 * (self.view.bounds.height + randomElementOne.frame.size.height))
+                    } completion: { _ in
+                        if randomElementOne.frame.maxY == self.view.frame.maxY + randomElementOne.frame.size.height {
+                            print("Второй элемент")
+                            self.defaults.points += 1
+                        }
+                    }
                 }
-            }
-        }
     }
     
     @objc func findIntersects() {
         self.pointsLabel.text = "\(self.defaults.points)"
-        if randomElement != nil || randomElementOne != nil {
-            if self.shipView.frame.intersects(self.randomElement!.layer.presentation()!.frame) || self.shipView.frame.intersects(self.randomElementOne!.layer.presentation()!.frame) {
+        if let randomElement = randomElement, let randomElementOne = randomElementOne {
+            if self.shipView.frame.intersects(randomElement.layer.presentation()!.frame) || self.shipView.frame.intersects(randomElementOne.layer.presentation()!.frame) {
                 let alert = UIAlertController(title: NSLocalizedString("game_over", comment: ""), message: NSLocalizedString("your_result", comment: "") + "\(self.defaults.points)", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: NSLocalizedString("list_of_leaders", comment: ""), style: .default, handler: self.openLeaders))
                 present(alert, animated: true, completion: nil)
