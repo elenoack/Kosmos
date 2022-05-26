@@ -1,0 +1,51 @@
+
+/* Class = "UILabel"; text = "Username"; ObjectID = "0KU-pr-yzo"; */
+"0KU-pr-yzo.text" = "Username";
+
+/* Class = "UILabel"; text = "Space"; ObjectID = "2mR-m8-wZZ"; */
+"2mR-m8-wZZ.text" = "Space";
+
+/* Class = "UILabel"; text = "Level"; ObjectID = "6f2-My-AaB"; */
+"6f2-My-AaB.text" = "Level";
+
+/* Class = "UILabel"; text = "Settings"; ObjectID = "9Pg-0B-OoK"; */
+"9Pg-0B-OoK.text" = "Settings";
+
+/* Class = "UIButton"; configuration.title = "Continue"; ObjectID = "Ewt-SV-maL"; */
+"Ewt-SV-maL.configuration.title" = "Continue";
+
+/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "Ewt-SV-maL"; */
+"Ewt-SV-maL.normalTitle" = "Button";
+
+/* Class = "UIButton"; configuration.title = "Leaders"; ObjectID = "Idv-4m-m50"; */
+"Idv-4m-m50.configuration.title" = "Leaders";
+
+/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "Idv-4m-m50"; */
+"Idv-4m-m50.normalTitle" = "Button";
+
+/* Class = "UITextField"; placeholder = "Username"; ObjectID = "RrO-Xg-VeC"; */
+"RrO-Xg-VeC.placeholder" = "Username";
+
+/* Class = "UISegmentedControl"; XRy-Rv-qRg.segmentTitles[0] = "Space"; ObjectID = "XRy-Rv-qRg"; */
+"XRy-Rv-qRg.segmentTitles[0]" = "Space";
+
+/* Class = "UISegmentedControl"; XRy-Rv-qRg.segmentTitles[1] = "B/w"; ObjectID = "XRy-Rv-qRg"; */
+"XRy-Rv-qRg.segmentTitles[1]" = "B/w";
+
+/* Class = "UISegmentedControl"; XRy-Rv-qRg.segmentTitles[2] = "Origami"; ObjectID = "XRy-Rv-qRg"; */
+"XRy-Rv-qRg.segmentTitles[2]" = "Origami";
+
+/* Class = "UISegmentedControl"; XRy-Rv-qRg.segmentTitles[3] = "Childhood"; ObjectID = "XRy-Rv-qRg"; */
+"XRy-Rv-qRg.segmentTitles[3]" = "Childhood";
+
+/* Class = "UILabel"; text = "1"; ObjectID = "f74-43-iYu"; */
+"f74-43-iYu.text" = "1";
+
+/* Class = "UILabel"; text = "Leaders"; ObjectID = "rbR-SC-dsL"; */
+"rbR-SC-dsL.text" = "Leaders";
+
+/* Class = "UIButton"; configuration.title = "Menu"; ObjectID = "xBz-td-umn"; */
+"xBz-td-umn.configuration.title" = "Menu";
+
+/* Class = "UIButton"; normalTitle = "Button"; ObjectID = "xBz-td-umn"; */
+"xBz-td-umn.normalTitle" = "Button";

@@ -1,14 +1,14 @@
 //
-//  UIButton+Extensions.swift
-//  Homework14
+//  extension UIButton.swift
+//  Kosmos
 //
 //  Created by TMS on 13.11.2021.
 //
 
+
 import UIKit
 
 extension UIButton {
-    
     convenience init(title: String?,
                      font: UIFont? = nil,
                      color: UIColor? = nil) {

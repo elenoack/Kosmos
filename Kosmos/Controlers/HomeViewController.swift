@@ -1,23 +1,36 @@
 //
-//  ViewController.swift
+//  HomeViewController.swift
 //  Kosmos
 //
 //  Created by mac on 19.11.21.
 //
 
+
 import UIKit
 
 class HomeViewController: UIViewController {
+    // MARK: - Properties
+    
+    override var preferredStatusBarStyle : UIStatusBarStyle {
+        return .lightContent
+    }
     
     let storyboardInstance = UIStoryboard(name: "Main", bundle: nil)
     var background = UIImageView(image: UIImage(named: "HomeBackground"))
+    let newGameButton = UIButton(title: NSLocalizedString("new_game", comment: ""),font: UIFont(name: "UsuallyfontBold", size: 24), color: .red)
+    let settingsButton = UIButton(title: NSLocalizedString("settings", comment: ""),font: UIFont(name: "UsuallyfontRegular", size: 24), color: .black)
     
-    let newGameButton = UIButton(title: "Новая Игра",font: UIFont(name: "UsuallyfontBold", size: 24), color: .red)
-    let settingsButton = UIButton(title: "Настройки",font: UIFont(name: "UsuallyfontRegular", size: 24), color: .black)
+    // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setNeedsStatusBarAppearanceUpdate()
         setupViews()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        var _: UIStatusBarStyle = .lightContent
     }
     
     @objc func showGameScreen() {
@@ -31,7 +44,8 @@ class HomeViewController: UIViewController {
     }
 }
 
-// MARK: - private
+// MARK: - Private
+
 private extension HomeViewController {
     
     func setupViews() {
@@ -53,3 +67,5 @@ private extension HomeViewController {
         settingsButton.addTarget(self, action:#selector(showSettingsScreen), for: .touchUpInside)
     }
 }
+
+

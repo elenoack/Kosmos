@@ -1,3 +1,10 @@
+//
+//  UserDefault.swift
+//  Kosmos
+//
+//  Created by TMS on 13.11.2021.
+//
+
 import Foundation
 
 @propertyWrapper
@@ -63,3 +70,4 @@ struct ListUserDefault<T: PropertyListValue> {
         set { UserDefaults.standard.set(newValue, forKey: key.rawValue) }
     }
 }
+
