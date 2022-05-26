@@ -7,6 +7,7 @@
 
 import UIKit
 
+
 class SettingsViewController: UIViewController {
     // MARK: - Properties
     
@@ -17,7 +18,8 @@ class SettingsViewController: UIViewController {
     @IBOutlet weak var levelSegmentedControl: UISegmentedControl!
     private let defaults = UserDefaultsStorage()
     
-    // MARK: - View Life Cycle
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setNeedsStatusBarAppearanceUpdate()

@@ -13,10 +13,12 @@ class LeadersViewController: UIViewController, UITableViewDelegate, UITableViewD
     override var preferredStatusBarStyle : UIStatusBarStyle {
         return .lightContent
     }
+    
     @IBOutlet weak var tableView: UITableView!
     private let defaults = UserDefaultsStorage()
     
-    // MARK: - View Life Cycle
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setNeedsStatusBarAppearanceUpdate()
@@ -33,6 +35,7 @@ class LeadersViewController: UIViewController, UITableViewDelegate, UITableViewD
 }
 
 // MARK: - UITableViewDataSource
+
 extension LeadersViewController {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

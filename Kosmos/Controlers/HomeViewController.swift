@@ -1,15 +1,16 @@
 //
-//  ViewController.swift
+//  HomeViewController.swift
 //  Kosmos
 //
 //  Created by mac on 19.11.21.
 //
 
+
 import UIKit
 
 class HomeViewController: UIViewController {
     // MARK: - Properties
-
+    
     override var preferredStatusBarStyle : UIStatusBarStyle {
         return .lightContent
     }
@@ -19,7 +20,8 @@ class HomeViewController: UIViewController {
     let newGameButton = UIButton(title: NSLocalizedString("new_game", comment: ""),font: UIFont(name: "UsuallyfontBold", size: 24), color: .red)
     let settingsButton = UIButton(title: NSLocalizedString("settings", comment: ""),font: UIFont(name: "UsuallyfontRegular", size: 24), color: .black)
     
-    // MARK: - View Life Cycle
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setNeedsStatusBarAppearanceUpdate()
@@ -42,7 +44,8 @@ class HomeViewController: UIViewController {
     }
 }
 
-// MARK: - private
+// MARK: - Private
+
 private extension HomeViewController {
     
     func setupViews() {
