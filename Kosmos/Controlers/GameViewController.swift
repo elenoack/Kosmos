@@ -5,22 +5,28 @@
 //  Created by mac on 19.11.21.
 //
 
+
 import UIKit
-import Foundation
 
 class GameViewController: UIViewController {
+    // MARK: - Properties
     
+    let blurView: UIVisualEffectView = {
+        let view = UIVisualEffectView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    var isPaused = true
     var namePlayer = UILabel()
-    
     private let defaults = UserDefaultsStorage()
-    
     @IBOutlet weak var pointsLabel: UILabel!
     @IBOutlet weak var litleMeteoriteImage: UIImageView!
     
     var background = UIImageView(image: UIImage(named: "Background"))
     var background2 = UIImageView(image: UIImage(named: "Background"))
     
-    private let closeButton = UIButton(title: "меню",font: UIFont(name: "UsuallyfontRegular", size: 24), color: .red)
+    private let closeButton = UIButton(title: NSLocalizedString("menu", comment: ""),font: UIFont(name: "UsuallyfontRegular", size: 24), color: .red)
     
     var shipImage = UIImageView(image: UIImage(named: "Ship"))
     let shipView = UIView()
@@ -35,12 +41,14 @@ class GameViewController: UIViewController {
     var greenMeteorite = UIImageView(image: UIImage(named: "GreenMeteorite"))
     
     var meteorites: [UIImageView] = []
-    var randomElement: UIView!
-    var randomElementOne: UIView!
+    var randomElement: UIView?
+    var randomElementOne: UIView?
     private var timer: Timer? = nil
-    private var otherTimer: Timer? = nil
+    private var intersectsTimer: Timer? = nil
+    private var pointsTimer: Timer? = nil
     
     enum Constants {
+        
         static var shipWidht: CGFloat = 115
         static var shipHeight: CGFloat = 100
         static var meteoriteWidht: CGFloat = 125
@@ -49,21 +57,30 @@ class GameViewController: UIViewController {
         static let closeButtonHeight: CGFloat = 44
     }
     
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         defaults.points = 0
         setupLevel()
         setupViews()
+        setupBlurView()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        defaults.points = 0
         setupAnimation()
         setupNamePlayer()
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+    }
 }
 
-// MARK: - private
+// MARK: - Private
+
 private extension GameViewController {
     
     func setupViews() {
@@ -87,23 +104,23 @@ private extension GameViewController {
         let recognizer = UIPanGestureRecognizer(target: self, action: #selector(moveShip))
         shipView.addGestureRecognizer(recognizer)
         
-        redMeteorite.addSubviews()
-        view.addSubview(redMeteorite)
-        blueMeteorite.addSubviews()
-        view.addSubview(blueMeteorite)
-        blackMeteorite.addSubviews()
-        view.addSubview(blackMeteorite)
-        orangeMeteorite.addSubviews()
-        view.addSubview(orangeMeteorite)
-        greenMeteorite.addSubviews()
-        view.addSubview(greenMeteorite)
+        meteorites.append(redMeteorite)
+        meteorites.append(blueMeteorite)
+        meteorites.append(blackMeteorite)
+        meteorites.append(orangeMeteorite)
+        meteorites.append(greenMeteorite)
+        
+        for meteorit in meteorites {
+            meteorit.addSubviews()
+            view.addSubview(meteorit)
+        }
         
         namePlayer.backgroundColor = .white
         namePlayer.alpha = 0.65
         namePlayer.font = UIFont(name: "UsuallyfontBold", size: 22)
         namePlayer.textColor = .darkGray
-        namePlayer.text = NSLocalizedString("Без имени",comment: "")
-
+        namePlayer.text = NSLocalizedString("nameless",comment: "")
+        
         view.addSubview(namePlayer)
         namePlayer.textAlignment = .left
         closeButton.backgroundColor = .white
@@ -131,25 +148,35 @@ private extension GameViewController {
         
         closeButton.addTarget(self, action: #selector(close), for: .touchUpInside)
         
-        meteorites.append(redMeteorite)
-        meteorites.append(blueMeteorite)
-        meteorites.append(blackMeteorite)
-        meteorites.append(orangeMeteorite)
-        meteorites.append(greenMeteorite)
-        
         pointsLabel.text = "\(defaults.points)"
         view.bringSubviewToFront(pointsLabel)
         view.bringSubviewToFront(litleMeteoriteImage)
     }
+    
+    func setupBlurView() {
+        view.addSubview(blurView)
+        view.bringSubviewToFront(blurView)
+        blurView.backgroundColor = .white
+        blurView.alpha = 0.65
+        NSLayoutConstraint.activate([
+            blurView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            blurView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            blurView.topAnchor.constraint(equalTo: view.topAnchor),
+            blurView.heightAnchor.constraint(equalToConstant: 38)
+        ])
+    }
 }
 
 // MARK: - Animation
+
 extension GameViewController {
     
     func setupAnimation() {
-        timer = Timer.scheduledTimer(timeInterval: 11, target: self, selector: #selector(createMeteorites), userInfo: nil, repeats: true)
-        
-        otherTimer = Timer.scheduledTimer(timeInterval: 11, target: self, selector: #selector(createOtherMeteorites), userInfo: nil, repeats: true)
+        if isPaused {
+            timer = Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(createMeteorites), userInfo: nil, repeats: true)
+            
+            intersectsTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(findIntersects), userInfo: nil, repeats: true)
+        }
         
         UIView.animate(withDuration: 11, delay: 0.0, options: [.repeat, .curveLinear], animations: {
             
@@ -160,66 +187,89 @@ extension GameViewController {
 }
 
 // MARK: - Action
+
 extension GameViewController {
     
     @objc func close() {
         
-        let alert = UIAlertController(title: "Сохранить результат?", message: nil , preferredStyle: .alert)
+        let alert = UIAlertController(title: NSLocalizedString("save_results?", comment: ""), message: nil , preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "ОК", style: .destructive, handler: save))
-        
-        alert.addAction(UIAlertAction(title: "Назад", style: .cancel, handler: back))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("back", comment: ""), style: .cancel, handler: back))
         present(alert, animated: true, completion: nil)
         
         func save(action: UIAlertAction) {
             
             if defaults.namePlayer == "" {
-                defaults.namePlayer = NSLocalizedString("без имени", comment: "")
+                defaults.namePlayer = NSLocalizedString("nameless", comment: "")
             }
             
-            let newPlayer = String(format: NSLocalizedString("🏆 Игрок %@ с результатом - %ld", comment: ""), defaults.namePlayer ?? "", defaults.points)
+            let newPlayer = String(format: NSLocalizedString("player_with_the_result", comment: ""), defaults.namePlayer ?? "", defaults.points)
             
             defaults.list.append(newPlayer)
-            defaults.list.sort()
+            sortingPlayers(with: &defaults.list)
             
             if defaults.list.count > 10 {
                 defaults.list.removeLast()
             }
-            dismiss(animated: false, completion: nil)
+            
+            let nextViewController = storyboard!.instantiateViewController(withIdentifier: "LeadersStoryboard")
+            present(nextViewController, animated: false, completion: nil)
+            isPaused = false
+            timer?.invalidate()
+            intersectsTimer?.invalidate()
         }
         
         func back(action: UIAlertAction)  {
             dismiss(animated: false, completion: nil)
+            isPaused = false
+            timer?.invalidate()
+            intersectsTimer?.invalidate()
         }
     }
     
     @objc func createMeteorites() {
         
         randomElement = meteorites.randomElement()
+        self.randomElement?.frame.origin.x = CGFloat.random(in: 0..<self.view.bounds.maxX - (self.randomElement?.frame.width ?? 0) - (self.randomElementOne?.frame.width ?? 0))
         
-        self.randomElement.frame.origin.x = CGFloat.random(in: 0..<self.view.bounds.maxX - self.randomElement.frame.width)
-        self.randomElement.frame.origin.y = self.view.frame.minY - self.randomElement.frame.height
+        self.randomElement?.frame.origin.y = self.view.frame.minY - (self.randomElement?.frame.height ?? 0)
         
-        UIView.animate(withDuration: 11,
-                       delay: 0) {
-            self.randomElement.frame.origin.y = (self.shipView.frame.minY - (self.randomElement.frame.height - 10))
-        } completion:  { _  in
-            if self.shipView.frame.intersects(self.randomElement.frame) {
-                
-                let alert = UIAlertController(title: NSLocalizedString("Конец игры!", comment: ""), message: NSLocalizedString("Ваш результат: ", comment: "") + "\(self.defaults.points)", preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: NSLocalizedString("К списку лидеров", comment: ""), style: .default, handler: self.openLeaders))
-
-                self.present(alert, animated: true, completion: nil)
-            } else {
-                self.defaults.points += 1
-                self.pointsLabel.text = "\(self.defaults.points)"
+        randomElementOne = meteorites.randomElement()
+        self.randomElementOne?.frame.origin.x = CGFloat.random(in: 0..<self.view.bounds.maxX - (self.randomElement?.frame.width ?? 0) - (self.randomElementOne?.frame.width ?? 0))
+        
+        self.randomElementOne?.frame.origin.y = self.view.frame.minY - (self.randomElementOne?.frame.height ?? 0)
+        
+        if let randomElement = randomElement {
+            UIView.animate(withDuration: 7,
+                           delay: 0, options: [.curveLinear]) {
+                randomElement.frame = randomElement.frame.offsetBy(dx: 0.0, dy: +1 * (self.view.bounds.height + randomElement.frame.size.height))
+            } completion: { _ in
+                if randomElement.frame.maxY == self.view.frame.maxY + randomElement.frame.size.height {
+                    self.defaults.points += 1
+                }
             }
-            endAnimate()
         }
         
-        func endAnimate() {
-            UIView.animate(withDuration: 11,
-                           delay: 0) {
-                self.randomElement.frame.origin.y = self.view.frame.maxY }
+        if let randomElementOne = randomElementOne {
+            UIView.animate(withDuration: 7,
+                           delay: 4, options: [.curveLinear]) {
+                randomElementOne.frame = randomElementOne.frame.offsetBy(dx: 0.0, dy: +1 * (self.view.bounds.height + randomElementOne.frame.size.height))
+            } completion: { _ in
+                if randomElementOne.frame.maxY == self.view.frame.maxY + randomElementOne.frame.size.height {
+                    self.defaults.points += 1
+                }
+            }
+        }
+    }
+    
+    @objc func findIntersects() {
+        self.pointsLabel.text = "\(self.defaults.points)"
+        if let randomElement = randomElement, let randomElementOne = randomElementOne {
+            if self.shipView.frame.intersects(randomElement.layer.presentation()!.frame) || self.shipView.frame.intersects(randomElementOne.layer.presentation()!.frame) {
+                let alert = UIAlertController(title: NSLocalizedString("game_over", comment: ""), message: NSLocalizedString("your_result", comment: "") + "\(self.defaults.points)", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: NSLocalizedString("list_of_leaders", comment: ""), style: .default, handler: self.openLeaders))
+                present(alert, animated: true, completion: nil)
+            }
         }
     }
     
@@ -246,47 +296,16 @@ extension GameViewController {
         }
     }
     
-    @objc func createOtherMeteorites() {
-        
-        randomElementOne = meteorites.randomElement()
-        
-        self.randomElementOne.frame.origin.x = CGFloat.random(in: 0..<self.view.bounds.maxX - self.randomElement.frame.width - self.randomElementOne.frame.width)
-        self.randomElementOne.frame.origin.y = self.view.frame.minY - self.randomElementOne.frame.height
-        
-        UIView.animate(withDuration: 11,
-                       delay: 4) {
-            self.randomElementOne.frame.origin.y = (self.shipView.frame.minY - (self.randomElementOne.frame.height - 10))
-        } completion:  { _  in
-            if self.shipView.frame.intersects(self.randomElementOne.frame) {
-                
-                let alert = UIAlertController(title: "Конец игры!", message: "Ваш результат: \(self.defaults.points)", preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "К списку лидеров", style: .default, handler: self.openLeaders))
-                self.present(alert, animated: true, completion: nil)
-                
-            } else {
-                self.defaults.points += 1
-                self.pointsLabel.text = "\(self.defaults.points)"
-            }
-            endAnimate()
-        }
-        
-        func endAnimate() {
-            UIView.animate(withDuration: 11,
-                           delay: 0) {
-                self.randomElementOne.frame.origin.y = self.view.frame.maxY }
-        }
-    }
-    
     func openLeaders(action: UIAlertAction) {
         
         if defaults.namePlayer == "" {
-            defaults.namePlayer = NSLocalizedString("без имени", comment: "")
+            defaults.namePlayer = NSLocalizedString("nameless", comment: "")
         }
         
-        let newPlayer = String(format: NSLocalizedString("🏆 Игрок %@ с результатом - %ld", comment: ""), defaults.namePlayer ?? "", defaults.points)
-
+        let newPlayer = String(format: NSLocalizedString("player_with_the_result", comment: ""), defaults.namePlayer ?? "", defaults.points)
+        
         defaults.list.append(newPlayer)
-        defaults.list.sort()
+        sortingPlayers(with: &defaults.list)
         
         if defaults.list.count > 10 {
             defaults.list.removeLast()
@@ -294,10 +313,14 @@ extension GameViewController {
         
         let nextViewController = storyboard!.instantiateViewController(withIdentifier: "LeadersStoryboard")
         present(nextViewController, animated: false, completion: nil)
+        isPaused = false
+        timer?.invalidate()
+        intersectsTimer?.invalidate()
     }
 }
 
-//MARK: - private
+//MARK: - Configuration
+
 private extension GameViewController {
     
     func setupNamePlayer() {
@@ -306,21 +329,31 @@ private extension GameViewController {
         }
     }
     
+    func sortingPlayers(with array: inout [String]) {
+        var dictionaries = [String: Int]()
+        for players in array {
+            if let number = Int(players.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()) {
+                dictionaries[players] = number
+            }
+        }
+        array.removeAll()
+        array = Array(dictionaries.keys).sorted(by: { (dictionaries[$0] ?? 0) > (dictionaries[$1] ?? 0) })
+    }
+    
     func setupLevel() {
-        if defaults.level == 0 {
+        switch defaults.level {
+        case 0:
             Constants.shipWidht = 100
             Constants.shipHeight = 100
             Constants.meteoriteWidht = 125
             Constants.meteoriteHeigth = 125
             Constants.distanceOfShip = 185
-            
-        } else if defaults.level == 1 {
+        case 1:
             Constants.shipWidht = 100
             Constants.shipHeight = 125
             Constants.meteoriteWidht = 115
             Constants.meteoriteHeigth = 115
             Constants.distanceOfShip = 245
-            
             background = UIImageView(image: UIImage(named: "BWBackground"))
             background2 = UIImageView(image: UIImage(named: "BWBackground"))
             shipImage = UIImageView(image: UIImage(named: "BWShip"))
@@ -329,14 +362,12 @@ private extension GameViewController {
             blackMeteorite = UIImageView(image: UIImage(named: "BWBlackMeteorite"))
             orangeMeteorite = UIImageView(image: UIImage(named: "BWOrangeMeteorite"))
             greenMeteorite = UIImageView(image: UIImage(named: "BWGreenMeteorite"))
-            
-        } else  if defaults.level == 2 {
+        case 2:
             Constants.shipWidht = 100
             Constants.shipHeight = 160
             Constants.distanceOfShip = 220
             Constants.meteoriteWidht = 115
             Constants.meteoriteHeigth = 115
-            
             background = UIImageView(image: UIImage(named: "OrigamiBackground"))
             background2 = UIImageView(image: UIImage(named: "OrigamiBackground"))
             shipImage = UIImageView(image: UIImage(named: "OrigamiShip"))
@@ -345,14 +376,12 @@ private extension GameViewController {
             blackMeteorite = UIImageView(image: UIImage(named: "OrigamiBlackMeteorite"))
             orangeMeteorite = UIImageView(image: UIImage(named: "OrigamiOrangeMeteorite"))
             greenMeteorite = UIImageView(image: UIImage(named: "OrigamiGreenMeteorite"))
-            
-        } else  if defaults.level == 3 {
+        case 3:
             Constants.shipWidht = 70
             Constants.shipHeight = 160
             Constants.distanceOfShip = 240
             Constants.meteoriteWidht = 100
             Constants.meteoriteHeigth = 100
-            
             background = UIImageView(image: UIImage(named: "CartoonBackground"))
             background2 = UIImageView(image: UIImage(named: "CartoonBackground"))
             shipImage = UIImageView(image: UIImage(named: "CartoonShip"))
@@ -361,6 +390,8 @@ private extension GameViewController {
             blackMeteorite = UIImageView(image: UIImage(named: "CartoonBlackMeteorite"))
             orangeMeteorite = UIImageView(image: UIImage(named: "CartoonOrangeMeteorite"))
             greenMeteorite = UIImageView(image: UIImage(named: "CartoonGreenMeteorite"))
+        default:
+            print("Error")
         }
     }
 }

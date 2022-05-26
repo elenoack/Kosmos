@@ -7,19 +7,26 @@
 
 import UIKit
 
+
 class SettingsViewController: UIViewController {
+    // MARK: - Properties
     
+    override var preferredStatusBarStyle : UIStatusBarStyle {
+        return .lightContent
+    }
     @IBOutlet weak var namePlayerTextField: UITextField!
     @IBOutlet weak var levelSegmentedControl: UISegmentedControl!
-    
     private let defaults = UserDefaultsStorage()
+    
+    // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        setNeedsStatusBarAppearanceUpdate()
         levelSegmentedControl.selectedSegmentIndex = defaults.level
         namePlayerTextField.text = defaults.namePlayer
     }
-    
+        
     @IBAction func openLeadersList(_ sender: UIButton) {
         let nextViewController = storyboard!.instantiateViewController(withIdentifier: "LeadersStoryboard")
         present(nextViewController, animated: false, completion: nil)
@@ -31,3 +38,4 @@ class SettingsViewController: UIViewController {
         dismiss(animated: false, completion: nil)
     }    
 }
+
