@@ -110,6 +110,7 @@
 		046A5E2327F7861E0080B6F0 /* Kosmos */ = {
 			isa = PBXGroup;
 			children = (
+				04F0AC5D2840BD730084689C /* Application */,
 				04CF0651283F62ED0065D452 /* Supporting Files */,
 				048DF93A27F7888B00B3B5DB /* Extensions */,
 				04927E4927A2DE3E00616E46 /* Localizable */,
@@ -144,8 +145,6 @@
 		04CF0651283F62ED0065D452 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				04CF064D283F62CA0065D452 /* AppDelegate.swift 10-24-25-809.swift */,
-				04CF0654283F7F0F0065D452 /* SceneDelegate.swift 10-24-25-801.swift 10-26-00-322.swift */,
 				040C36F62747F0A5002EBEBD /* Assets.xcassets */,
 				040C36F82747F0A5002EBEBD /* LaunchScreen.storyboard */,
 			);
@@ -159,6 +158,15 @@
 				0454769827492932005674A2 /* Usually-font.otf */,
 			);
 			path = Fonts;
+			sourceTree = "<group>";
+		};
+		04F0AC5D2840BD730084689C /* Application */ = {
+			isa = PBXGroup;
+			children = (
+				04CF064D283F62CA0065D452 /* AppDelegate.swift 10-24-25-809.swift */,
+				04CF0654283F7F0F0065D452 /* SceneDelegate.swift 10-24-25-801.swift 10-26-00-322.swift */,
+			);
+			path = Application;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -420,7 +428,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -450,7 +458,7 @@
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
